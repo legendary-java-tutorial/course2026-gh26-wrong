@@ -10,6 +10,7 @@ export type Game = {
   warm: string;
   cool: string;
   freezing: string;
+  rangeHint: string;
   repeatedGuess: string;
   replayPrompt: string;
   replayYes: string;
@@ -48,7 +49,7 @@ export function parseGame(text: string): Game {
 export function checkGame(data: unknown): Game {
   const g = data as Game;
   if (!g || typeof g !== "object") throw new Error("docs/game.json: ожидается объект в фигурных скобках");
-  for (const key of ["theme", "greeting", "attempts", "hot", "warm", "cool", "freezing", "repeatedGuess", "replayPrompt", "replayYes", "replayNo", "replayEnd", "recordsTitle", "recordsEmpty", "recordLine"] as const) {
+  for (const key of ["theme", "greeting", "attempts", "hot", "warm", "cool", "freezing", "rangeHint", "repeatedGuess", "replayPrompt", "replayYes", "replayNo", "replayEnd", "recordsTitle", "recordsEmpty", "recordLine"] as const) {
     if (typeof g[key] !== "string" || g[key].trim() === "") throw new Error(`docs/game.json: пустое или пропущенное поле "${key}"`);
   }
   if (!g.cli || typeof g.cli !== "object") throw new Error('docs/game.json: нет настроек интерфейса в "cli"');
@@ -128,6 +129,22 @@ export function temperatureHint(game: Game, mode: Mode, secret: number, guess: n
   if (distance <= range * 0.3) return game.warm;
   if (distance <= range * 0.6) return game.cool;
   return game.freezing;
+}
+
+// Подсказка появляется после пяти неверных попыток.
+export function shouldShowRangeHint(failedAttempts: number): boolean {
+  return failedAttempts >= 5;
+}
+
+// Диапазон по истории догадок; неизвестную границу заменяет граница режима.
+export function rangeHint(game: Game, mode: Mode, secret: number, guesses: Iterable<number>): string {
+  let lower = mode.min;
+  let upper = mode.max;
+  for (const guess of guesses) {
+    if (guess < secret && guess > lower) lower = guess;
+    if (guess > secret && guess < upper) upper = guess;
+  }
+  return game.rangeHint.replace("{min}", String(lower)).replace("{max}", String(upper));
 }
 
 // Загаданное число режима: целое от min до max включительно.
