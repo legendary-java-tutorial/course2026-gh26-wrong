@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { parseGame, hint, temperatureHint, parseGuess, secretFor, addRecord, parseRecords, topRecords, type Game, type GameRecord } from "./game.js";
+import { parseGame, hint, temperatureHint, rangeHint, shouldShowRangeHint, parseGuess, secretFor, addRecord, parseRecords, topRecords, type Game, type GameRecord } from "./game.js";
 
 let game: Game;
 try {
@@ -96,6 +96,7 @@ while (replay) {
     console.log(fill(game.cli.hintLine, { hint: hint(mode, secret, guess) }));
     console.log(fill(game.cli.temperatureLine, { hint: temperatureHint(game, mode, secret, guess) }));
     guesses.add(guess);
+    if (shouldShowRangeHint(tries)) console.log(rangeHint(game, mode, secret, guesses));
     tries++;
   }
   replay = (await rl.question(fill(game.cli.replayLine, { prompt: game.replayPrompt, yes: game.replayYes, no: game.replayNo }))).trim().toLocaleLowerCase() === game.replayYes.toLocaleLowerCase();
