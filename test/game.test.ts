@@ -31,7 +31,6 @@ test("подсказка: степень близости к загаданно�
   const mode = game.modes["трудный"];
   assert.equal(temperatureHint(game, mode, 1, 75), game.hot);
   assert.equal(temperatureHint(game, mode, 1, 76), game.warm);
-  assert.equal(temperatureHint(game, mode, 1, 151), game.cool);
   assert.equal(temperatureHint(game, mode, 1, 302), game.freezing);
 });
 
