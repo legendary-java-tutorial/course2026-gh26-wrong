@@ -14,7 +14,7 @@ export function checkGame(data) {
     const g = data;
     if (!g || typeof g !== "object")
         throw new Error("docs/game.json: ожидается объект в фигурных скобках");
-    for (const key of ["theme", "greeting", "attempts", "hot", "warm", "cool", "freezing", "repeatedGuess", "replayPrompt", "replayYes", "replayNo", "replayEnd", "recordsTitle", "recordsEmpty", "recordLine"]) {
+    for (const key of ["theme", "greeting", "attempts", "hot", "warm", "cool", "freezing", "rangeHint", "repeatedGuess", "replayPrompt", "replayYes", "replayNo", "replayEnd", "recordsTitle", "recordsEmpty", "recordLine"]) {
         if (typeof g[key] !== "string" || g[key].trim() === "")
             throw new Error(`docs/game.json: пустое или пропущенное поле "${key}"`);
     }
@@ -103,6 +103,22 @@ export function temperatureHint(game, mode, secret, guess) {
     if (distance <= range * 0.6)
         return game.cool;
     return game.freezing;
+}
+// Подсказка появляется после пяти неверных попыток.
+export function shouldShowRangeHint(failedAttempts) {
+    return failedAttempts >= 5;
+}
+// Диапазон по истории догадок; неизвестную границу заменяет граница режима.
+export function rangeHint(game, mode, secret, guesses) {
+    let lower = mode.min;
+    let upper = mode.max;
+    for (const guess of guesses) {
+        if (guess < secret && guess > lower)
+            lower = guess;
+        if (guess > secret && guess < upper)
+            upper = guess;
+    }
+    return game.rangeHint.replace("{min}", String(lower)).replace("{max}", String(upper));
 }
 // Загаданное число режима: целое от min до max включительно.
 export function secretFor(mode, random = Math.random) {

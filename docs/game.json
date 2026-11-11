@@ -6,6 +6,7 @@
   "warm": "Тепло",
   "cool": "Прохладно",
   "freezing": "Мороз!",
+  "rangeHint": "Число где-то от {min} до {max}.",
   "repeatedGuess": "Это число ты уже вводил.",
   "replayPrompt": "Сыграем ещё?",
   "replayYes": "Да",
