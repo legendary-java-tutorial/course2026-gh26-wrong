@@ -1,5 +1,5 @@
 // Игра в браузере: та же сборка в docs/ и тот же docs/game.json; страница — docs/index.html (GitHub Pages).
-import { parseGame, hint, temperatureHint, parseGuess, secretFor, addRecord, parseRecords, topRecords, type Game, type Mode } from "./game.js";
+import { parseGame, hint, temperatureHint, rangeHint, shouldShowRangeHint, parseGuess, secretFor, addRecord, parseRecords, topRecords, type Game, type Mode } from "./game.js";
 
 const $ = (id: string) => document.getElementById(id)!;
 const input = $("guess") as HTMLInputElement;
@@ -112,7 +112,8 @@ $("play").onsubmit = (e) => {
     return;
   }
   const repeatedHint = guesses.has(guess) ? `${game.repeatedGuess} ` : "";
-  $("answer").textContent = `${repeatedHint}${hint(mode, secret, guess)} ${temperatureHint(game, mode, secret, guess)}`;
+  const answer = `${repeatedHint}${hint(mode, secret, guess)} ${temperatureHint(game, mode, secret, guess)}`;
   guesses.add(guess);
+  $("answer").textContent = shouldShowRangeHint(tries) ? `${answer} ${rangeHint(game, mode, secret, guesses)}` : answer;
   input.focus();
 };

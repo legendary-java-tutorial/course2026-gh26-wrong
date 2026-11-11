@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { parseGame, hint, temperatureHint, parseGuess, secretFor, addRecord, parseRecords, topRecords } from "../src/game.ts";
+import { parseGame, hint, temperatureHint, rangeHint, shouldShowRangeHint, parseGuess, secretFor, addRecord, parseRecords, topRecords } from "../src/game.ts";
 
 test("тексты игры: docs/game.json правильный, режимы названы в приветствии", () => {
   const game = parseGame(readFileSync(new URL("../docs/game.json", import.meta.url), "utf8"));
@@ -60,6 +60,21 @@ test("рекорды: чтение повреждённых данных и от
     { mode: "classic", attempts: 1, date: "не дата" },
   ]));
   assert.deepEqual(records, [{ mode: "quick", attempts: 2, date: "2026-11-10T10:00:00.000Z" }]);
+});
+
+test("подсказка-диапазон: появляется после пятой ошибки", () => {
+  assert.equal(shouldShowRangeHint(4), false);
+  assert.equal(shouldShowRangeHint(5), true);
+  assert.equal(shouldShowRangeHint(6), true);
+});
+
+test("подсказка-диапазон: границы режима заменяются догадками и сужаются", () => {
+  const game = parseGame(readFileSync(new URL("../docs/game.json", import.meta.url), "utf8"));
+  const mode = game.modes.classic;
+  assert.equal(rangeHint(game, mode, 50, []), "Число где-то от 1 до 100.");
+  assert.equal(rangeHint(game, mode, 50, [20, 80]), "Число где-то от 20 до 80.");
+  assert.equal(rangeHint(game, mode, 50, [20, 30, 80, 70]), "Число где-то от 30 до 70.");
+  assert.equal(rangeHint(game, mode, 50, [50]), "Число где-то от 1 до 100.");
 });
 
 test("логика игры: ответы на догадку и загаданное число", () => {
